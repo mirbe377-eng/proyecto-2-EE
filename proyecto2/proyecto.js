@@ -1,33 +1,37 @@
+let username = "";
+
+function getUserInput(question) {
+    return prompt(question);
+}
 let intentos = 6;
 const palabrasecreta = "paralelepipedo";
 let tablero = Array(palabrasecreta.length).fill("_");
-
 function nombre(nombre){
-  console.log("Bienvenida " + nombre + " al ahorcado. Tienes 6 intentos. ¡Comencemos!");
-  console.log("Palabra actual: " + tablero.join(" "));
+  alert("Bienvenida " + nombre + " al ahorcado. Tienes 6 intentos. ¡Comencemos!");
+  alert("Palabra actual: " + tablero.join(" "));
 }
 
 function verificarLetra(letra) {
     let palabra = letra.toLowerCase();
 
     if (palabrasecreta.includes(palabra) && letra != "") {
-        console.log("¡Bien! La letra '" + palabra + "' es correcta.");
-        
+        alert("¡Bien! La letra '" + palabra + "' es correcta.");
+       
         for (let i = 0; i < palabrasecreta.length; i++) {
             if (palabrasecreta[i] === palabra) {
                 tablero[i] = palabra;
             }
         }
-        
-        console.log("Progreso: " + tablero.join(" "));
-        
+       
+        alert("Progreso: " + tablero.join(" "));
+       
         if (!tablero.includes("_")) {
-               console.log("¡Ganaste! Adivinaste la palabra: " + palabrasecreta)
+               alert("¡Ganaste! Adivinaste la palabra: " + palabrasecreta);
         }
 
     } else if((intentos <= 6 && intentos >= 1) && letra != "") {
         intentos--;
-        console.log("No es correcta. Te quedan " + intentos + " intentos.");
+        alert("No es correcta. Te quedan " + intentos + " intentos.");
     }
 
     if(intentos === 1 && letra != "" ){
@@ -37,15 +41,22 @@ function verificarLetra(letra) {
     }
 }
 
+function startGame(){
+    username = getUserInput("What is your name?");
+   
+    if (username) {
+        nombre(username);
 
-nombre("");
-verificarLetra(""); 
-verificarLetra("");
-verificarLetra("");
-verificarLetra("");
-verificarLetra("");
-verificarLetra("");
-verificarLetra("");
-verificarLetra("");
+        while (intentos > 0 && tablero.includes("_")) {
+            let letraIngresada = getUserInput("Introduce una letra:");
+            if (letraIngresada === null) break;
+            verificarLetra(letraIngresada);
+        }
+    }
+}
+
+startGame();
+
+
 
 
