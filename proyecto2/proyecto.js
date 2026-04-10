@@ -1,62 +1,100 @@
-let username = "";
+const readline = require('readline');
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 function getUserInput(question) {
-    return prompt(question);
+    return new Promise((resolve) => {
+        rl.question(question + " ", (answer) => {
+            resolve(answer);
+        });
+    });
 }
+
+let username = "";
 let intentos = 6;
-const palabrasecreta = "paralelepipedo";
-let tablero = Array(palabrasecreta.length).fill("_");
-function nombre(nombre){
-  alert("Bienvenida " + nombre + " al ahorcado. Tienes 6 intentos. ¡Comencemos!");
-  alert("Palabra actual: " + tablero.join(" "));
+const palabrasecreta = ["paralelepipedo", "periodico", "salon"];
+const aligealazar = Math.floor(Math.random() * palabrasecreta.length);
+const elegido = palabrasecreta[aligealazar]; 
+
+let tablero = Array(elegido.length).fill("_");
+// NUEVO: Array para almacenar las letras que el usuario ingresa (Rúbrica punto 1)
+let letrasIngresadas = [];
+
+function mostrarEstado() {
+    console.log("\n-----------------------------------");
+    console.log("Palabra actual: " + tablero.join(" "));
+    console.log("Intentos restantes: " + intentos);
+    
+    // NUEVO: Ciclo for para mostrar el registro de letras (Puntos Extras)
+    let registro = "";
+    for (let i = 0; i < letrasIngresadas.length; i++) {
+        registro += letrasIngresadas[i] + " ";
+    }
+    console.log("Letras intentadas: " + registro);
+    console.log("-----------------------------------");
 }
 
 function verificarLetra(letra) {
     let palabra = letra.toLowerCase();
 
-    if (palabrasecreta.includes(palabra) && letra != "") {
-        alert("¡Bien! La letra '" + palabra + "' es correcta.");
-       
-        for (let i = 0; i < palabrasecreta.length; i++) {
-            if (palabrasecreta[i] === palabra) {
+    // NUEVO: Validación para no repetir letras y usar .push() (Rúbrica punto 1)
+    if (letrasIngresadas.includes(palabra)) {
+        console.log("⚠️ Ya intentaste la letra '" + palabra + "'. Prueba con otra.");
+        return; 
+    }
+    
+    letrasIngresadas.push(palabra);
+
+    if (elegido.includes(palabra)) {
+        console.log("¡Bien! La letra '" + palabra + "' es correcta.");
+        for (let i = 0; i < elegido.length; i++) {
+            if (elegido[i] === palabra) {
                 tablero[i] = palabra;
             }
         }
-       
-        alert("Progreso: " + tablero.join(" "));
-       
-        if (!tablero.includes("_")) {
-               alert("¡Ganaste! Adivinaste la palabra: " + palabrasecreta);
-        }
-
-    } else if((intentos <= 6 && intentos >= 1) && letra != "") {
+    } else {
         intentos--;
-        alert("No es correcta. Te quedan " + intentos + " intentos.");
+        console.log("No es correcta. Te quedan " + intentos + " intentos.");
     }
 
-    if(intentos === 1 && letra != "" ){
-        alert("¡Cuidado! Te queda un solo intento.");
-    } else if(intentos === 0 && letra != "" ){
-        alert("Game Over. La palabra era: " + palabrasecreta);
+    if (intentos === 1) {
+        console.log("¡Cuidado! Te queda un solo intento.");
     }
 }
 
-function startGame(){
-    username = getUserInput("What is your name?");
-   
-    if (username) {
-        nombre(username);
-
-        while (intentos > 0 && tablero.includes("_")) {
-            let letraIngresada = getUserInput("Introduce una letra:");
-            if (letraIngresada === null) break;
-            verificarLetra(letraIngresada);
-        }
+async function startGame() {
+    while (true) {
+        username = await getUserInput("¿Cuál es tu nombre?");
+        if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/.test(username)) break;
+        console.log("❌ Error: Ingresa un nombre válido (solo letras).");
     }
+
+    console.log("\n¡Bienvenida " + username + " al ahorcado! ¡Comencemos!");
+
+    while (intentos > 0 && tablero.includes("_")) {
+        mostrarEstado();
+        let letraIngresada = await getUserInput("Introduce una letra:");
+
+        if (!/^[a-zA-ZñÑáéíóúÁÉÍÓÚ]$/.test(letraIngresada)) {
+            console.log("⚠️ Entrada no válida. Ingresa solo UNA letra.");
+            continue;
+        }
+
+        verificarLetra(letraIngresada);
+    }
+
+    if (!tablero.includes("_")) {
+        mostrarEstado(); // Mostrar el estado final antes de cerrar
+        console.log("\n¡GANASTE, " + username + "! Adivinaste la palabra: " + elegido);
+    } else {
+        console.log("\nGAME OVER. La palabra era: " + elegido);
+    }
+
+    rl.close();
 }
 
 startGame();
-
-
-
 
